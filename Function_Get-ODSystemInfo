@@ -1,0 +1,85 @@
+function get-ODSystemInfo {
+    <#
+    .SYNOPSIS
+    Queries Windows Device(s) pulling their information needed for Identifying and Monitoring.
+
+    .DESCRIPTION
+    Queries the OS and CS classes within WMI. Must run as administrator for the function to operate properly.
+
+    .PARAMETER Computername
+    The DNS name of the computer/device you wish to query.
+
+    .PARAMETER ShowProgress
+    Shows a progress bar of current operations and percantage completed.
+    Percentages will be inaccurate.
+
+    .PARAMETER IPAddress
+    The IP Address of the computer/device you wish to query.
+
+    .PARAMETER ErrorLogFilePath
+    Saving to the C:\TEMP directory under the text file ODSysInfoLog.
+
+    .EXAMPLE
+    get-ODSystemInfo -computername localhost, localhost
+    Queries the computer by the hostname or DNS Name of list of computers.
+    get-ODSystemInfo -IPAddress 127.0.0.1, 127.0.0.1
+    Queries the computer by the IP Address of a list of computers.
+    get-ODSystemInfo - computername localhost, localhost -ShowProgress
+    Will display a status bar with the progress of the function.
+    #>
+    param(
+        [Parameter(Mandatory=$True,
+                   ValueFromPipeline=$True,
+                   ValueFromPipelineByPropertyName=$True,
+                   ParameterSetName='computername',
+                   HelpMessage="Computer name to query via WMI")]
+        [Alias('hostname')]
+        [ValidateLength(9,16)]
+        [string[]]$computername,
+        [Parameter( Mandatory=$True,
+                    ParameterSetName='ip',
+                    HelpMessage="IP address to query via WMI")]
+        [ValidatePattern('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')]
+        [String[]]$IPAddress,
+
+        [Parameter()]
+        [string]$ErroLogFilePath = 'c:\temp\ODsysinfolog.txt',
+        [switch]$ShowProgress
+    )
+   BEGIN {
+        if ($PSBoundParameters.ContainsKey('IPAddress')) {
+            write-verbose "Putting IP addresses into variable"
+            $computername = $IPAddress
+        }
+        $each_computer = (100/ ($computername.count) -as [int])
+        $current_complete = 0
+
+   }
+   PROCESS {
+        foreach ($computer in $computername) {
+            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Begining to Query via WMI" -PercentComplete $current_complete}
+            
+            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Operating System" -PercentComplete $current_complete}
+            $os = Get-WmiObject -Class Win32_operatingsystem -ComputerName $computer
+            
+            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Computer System" -PercentComplete $current_complete}
+            $cs = Get-WmiObject -Class Win32_computersystem -ComputerName $computer
+            
+            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Network Adapter" -PercentComplete $current_complete}
+            $nt = Get-WmiObject -Class Win32_NetworkAdapter -ComputerName $computer
+            
+            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Creating Object along with it's properties" -PercentComplete $current_complete}
+            $props = [ordered]@{
+                    'computername' = $computer;
+                    'Users' = $os.NumberOfUsers;
+                    'OS status'= $os.Status;
+                    'Macs'= $nt.macaddress;
+                    'Device Make' = $cs.manufacturer
+                    }
+            $obj = New-Object -TypeName psobject -Property $props
+            write-output $obj
+        }
+   }
+   END{}
+        
+}
