@@ -1,4 +1,4 @@
-function get-ODSystemInfo {
+function Get-ODSystemInformation {
     <#
     .SYNOPSIS
     Queries Windows Device(s) pulling their information needed for Identifying and Monitoring.
@@ -43,7 +43,7 @@ function get-ODSystemInfo {
         [String[]]$IPAddress,
 
         [Parameter()]
-        [string]$ErroLogFilePath = 'c:\temp\ODsysinfolog.txt',
+        [string]$ErroLogFilePath = 'c:\ODsysinfolog.txt',
         [switch]$ShowProgress
     )
    BEGIN {
@@ -51,35 +51,50 @@ function get-ODSystemInfo {
             write-verbose "Putting IP addresses into variable"
             $computername = $IPAddress
         }
-        $each_computer = (100/ ($computername.count) -as [int])
+        $each_computer = (100/($computername.count) -as [int])
         $current_complete = 0
-
+        $ErrorLogCreated = Test-Path $ErroLogFilePath
+        if($ErroLogCreated -eq $False){
+            new-item -path 'c:\' -Name "ODSysteminfolog" -ItemType txt
+        }
    }
    PROCESS {
         foreach ($computer in $computername) {
-            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Begining to Query via WMI" -PercentComplete $current_complete}
-            
-            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Operating System" -PercentComplete $current_complete}
-            $os = Get-WmiObject -Class Win32_operatingsystem -ComputerName $computer
-            
-            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Computer System" -PercentComplete $current_complete}
-            $cs = Get-WmiObject -Class Win32_computersystem -ComputerName $computer
-            
-            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Network Adapter" -PercentComplete $current_complete}
-            $nt = Get-WmiObject -Class Win32_NetworkAdapter -ComputerName $computer
-            
-            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Creating Object along with it's properties" -PercentComplete $current_complete}
-            $props = [ordered]@{
-                    'computername' = $computer;
-                    'Users' = $os.NumberOfUsers;
-                    'OS status'= $os.Status;
-                    'Macs'= $nt.macaddress;
-                    'Device Make' = $cs.manufacturer
-                    }
-            $obj = New-Object -TypeName psobject -Property $props
-            write-output $obj
+            if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Begining to Query via WMI" -PercentComplete $current_complete}            
+            Try{
+                $ConnectivityTest=$True
+                if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Operating System" -PercentComplete $current_complete}
+                $os = Get-WmiObject -Class Win32_operatingsystem -ComputerName $computer -ErrorAction Stop
+            } catch{
+                Write-warning "Unable to connect to $computername's WMI. Please Verify the device is powered on or if the device name is valid. Logged into Error Log in C:\temp"
+                $ConnectivityTest=$False
+                if($ShowProgress) { Write-Progress -Activity "Failed on $computer" -CurrentOperation "Failed to Connect" -Completed
+                $computer | Out-File $ErroLogFilePath -Append
+            }}
+            if($ConnectivityTest) {
+                    if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Computer System" -PercentComplete $current_complete}
+                $cs = Get-WmiObject -Class Win32_computersystem -ComputerName $computer
+                
+                    if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Network Adapter" -PercentComplete $current_complete}
+                $nt = Get-WmiObject -Class Win32_NetworkAdapter -ComputerName $computer
+                
+                    if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Creating Object along with it's properties" -PercentComplete $current_complete}
+                $props = [ordered]@{
+                        'computername' = $computer;
+                        'Users' = $os.NumberOfUsers;
+                        'OS status'= $os.Status;
+                        'Macs'= $nt.macaddress;
+                        'Device Make' = $cs.manufacturer
+                        }
+                $obj = New-Object -TypeName psobject -Property $props
+                write-output $obj
+                $obj.PSObject.TypeNames.Insert(0,'OD.Systeminfo')
+                    if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Writing object and its properties to output" -PercentComplete $current_complete}
+                
+            }
         }
    }
-   END{}
-        
+   END{
+    if($ShowProgress) { Write-Progress -Activity "Done on $computer" -CurrentOperation "Done" -Completed }
+   }
 }
