@@ -1,4 +1,4 @@
-function Get-ODSystemInformation {
+function Get-ODSystemInfo {
     <#
     .SYNOPSIS
     Queries Windows Device(s) pulling their information needed for Identifying and Monitoring.
@@ -21,10 +21,14 @@ function Get-ODSystemInformation {
 
     .EXAMPLE
     get-ODSystemInfo -computername localhost, localhost
-    Queries the computer by the hostname or DNS Name of list of computers.
+    Queries the computer by the hostname or DNS Name in a list.
+    
+    .EXAMPLE
     get-ODSystemInfo -IPAddress 127.0.0.1, 127.0.0.1
-    Queries the computer by the IP Address of a list of computers.
-    get-ODSystemInfo - computername localhost, localhost -ShowProgress
+    Queries the computer by the IP Address in a list.
+    
+    .EXAMPLE
+    get-ODSystemInfo -computername localhost, localhost -ShowProgress
     Will display a status bar with the progress of the function.
     #>
     param(
@@ -87,8 +91,8 @@ function Get-ODSystemInformation {
                         'Device Make' = $cs.manufacturer
                         }
                 $obj = New-Object -TypeName psobject -Property $props
-                write-output $obj
                 $obj.PSObject.TypeNames.Insert(0,'OD.Systeminfo')
+                write-output $obj
                     if($ShowProgress) { Write-Progress -Activity "Working on $computer" -CurrentOperation "Writing object and its properties to output" -PercentComplete $current_complete}
                 
             }
