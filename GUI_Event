@@ -1,0 +1,663 @@
+
+#----------------------------------------------
+# Generated Form Function
+#----------------------------------------------
+function Show-test_psf {
+
+	#----------------------------------------------
+	#region Import the Assemblies
+	#----------------------------------------------
+	[void][reflection.assembly]::Load('System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089')
+	[void][reflection.assembly]::Load('System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
+	[void][reflection.assembly]::Load('System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
+	[void][reflection.assembly]::Load('System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089')
+	[void][reflection.assembly]::Load('PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35')
+	#endregion Import Assemblies
+
+	#----------------------------------------------
+	#region Generated Form Objects
+	#----------------------------------------------
+	[System.Windows.Forms.Application]::EnableVisualStyles()
+	$formEventView = New-Object 'System.Windows.Forms.Form'
+	$buttonGo = New-Object 'System.Windows.Forms.Button'
+	$buttonCancel = New-Object 'System.Windows.Forms.Button'
+	$labelEvents = New-Object 'System.Windows.Forms.Label'
+	$listlog = New-Object 'System.Windows.Forms.ComboBox'
+	$menustripTheme = New-Object 'System.Windows.Forms.MenuStrip'
+	$themeToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
+	$darkToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
+	$lightToolStripMenuItem = New-Object 'System.Windows.Forms.ToolStripMenuItem'
+	$InitialFormWindowState = New-Object 'System.Windows.Forms.FormWindowState'
+	#endregion Generated Form Objects
+
+	#----------------------------------------------
+	# User Generated Script
+	#----------------------------------------------
+	
+	$formEventView_Load={
+		#Pull event logs
+		Set-ControlTheme $formEventView -Theme Dark
+		$logs = Get-EventLog -List
+		foreach ($log in $logs)
+		{
+			Update-ComboBox -ComboBox $listlog -Append -Items $log.Log 
+		}
+	}
+	
+	$darkToolStripMenuItem_Click={
+		#TODO: Place custom script here
+		Set-ControlTheme -Control $formEventView -Theme Dark
+	}
+	
+	$lightToolStripMenuItem_Click={
+		Set-ControlTheme -Control $formEventView -Theme Light
+	}
+	
+	#region Control Theme Helper Function
+	<#
+		.SYNOPSIS
+			Applies a theme to the control and its children.
+		
+		.PARAMETER Control
+			The control to theme. Usually the form itself.
+		
+		.PARAMETER Theme
+			The color theme:
+			Light
+			Dark
+	
+		.PARAMETER CustomColor
+			A hashtable that contains the color values.
+			Keys:
+			WindowColor
+			ContainerColor
+			BackColor
+			ForeColor
+			BorderColor
+			SelectionForeColor
+			SelectionBackColor
+			MenuSelectionColor
+		.EXAMPLE
+			PS C:\> Set-ControlTheme -Control $form1 -Theme Dark
+		
+		.EXAMPLE
+			PS C:\> Set-ControlTheme -Control $form1 -CustomColor @{ WindowColor = 'White'; ContainerBackColor = 'Gray'; BackColor... }
+		.NOTES
+			Created by SAPIEN Technologies, Inc.
+	#>
+	function Set-ControlTheme
+	{
+		[CmdletBinding()]
+		param
+		(
+			[Parameter(Mandatory = $true)]
+			[ValidateNotNull()]
+			[System.ComponentModel.Component]$Control,
+			[ValidateSet('Light', 'Dark')]
+			[string]$Theme = 'Dark',
+			[System.Collections.Hashtable]$CustomColor
+		)
+		
+		$Font = [System.Drawing.Font]::New('Segoe UI', 9)
+		
+		#Initialize the colors
+		if ($Theme -eq 'Dark')
+		{
+			$WindowColor = [System.Drawing.Color]::FromArgb(32, 32, 32)
+			$ContainerColor = [System.Drawing.Color]::FromArgb(45, 45, 45)
+			$BackColor = [System.Drawing.Color]::FromArgb(32, 32, 32)
+			$ForeColor = [System.Drawing.Color]::White
+			$BorderColor = [System.Drawing.Color]::DimGray
+			$SelectionBackColor = [System.Drawing.SystemColors]::Highlight
+			$SelectionForeColor = [System.Drawing.Color]::White
+			$MenuSelectionColor = [System.Drawing.Color]::DimGray
+		}
+		else
+		{
+			$WindowColor = [System.Drawing.Color]::White
+			$ContainerColor = [System.Drawing.Color]::WhiteSmoke
+			$BackColor = [System.Drawing.Color]::Gainsboro
+			$ForeColor = [System.Drawing.Color]::Black
+			$BorderColor = [System.Drawing.Color]::DimGray
+			$SelectionBackColor = [System.Drawing.SystemColors]::Highlight
+			$SelectionForeColor = [System.Drawing.Color]::White
+			$MenuSelectionColor = [System.Drawing.Color]::LightSteelBlue
+		}
+		
+		if ($CustomColor)
+		{
+			#Check and Validate the custom colors:
+			$Color = $CustomColor.WindowColor -as [System.Drawing.Color]
+			if ($Color) { $WindowColor = $Color }
+			$Color = $CustomColor.ContainerColor -as [System.Drawing.Color]
+			if ($Color) { $ContainerColor = $Color }
+			$Color = $CustomColor.BackColor -as [System.Drawing.Color]
+			if ($Color) { $BackColor = $Color }
+			$Color = $CustomColor.ForeColor -as [System.Drawing.Color]
+			if ($Color) { $ForeColor = $Color }
+			$Color = $CustomColor.BorderColor -as [System.Drawing.Color]
+			if ($Color) { $BorderColor = $Color }
+			$Color = $CustomColor.SelectionBackColor -as [System.Drawing.Color]
+			if ($Color) { $SelectionBackColor = $Color }
+			$Color = $CustomColor.SelectionForeColor -as [System.Drawing.Color]
+			if ($Color) { $SelectionForeColor = $Color }
+			$Color = $CustomColor.MenuSelectionColor -as [System.Drawing.Color]
+			if ($Color) { $MenuSelectionColor = $Color }
+		}
+		
+		#Define the custom renderer for the menus
+		#region Add-Type definition
+		try
+		{
+			[SAPIENTypes.SAPIENColorTable] | Out-Null
+		}
+		catch
+		{
+			if ($PSVersionTable.PSVersion.Major -ge 7)
+			{
+				$Assemblies = 'System.Windows.Forms', 'System.Drawing', 'System.Drawing.Primitives'
+			}
+			else
+			{
+				$Assemblies = 'System.Windows.Forms', 'System.Drawing'
+			}
+			Add-Type -ReferencedAssemblies $Assemblies -TypeDefinition "
+using System;
+using System.Windows.Forms;
+using System.Drawing;
+namespace SAPIENTypes
+{
+    public class SAPIENColorTable : ProfessionalColorTable
+    {
+        Color ContainerBackColor;
+        Color BackColor;
+        Color BorderColor;
+		Color SelectBackColor;
+
+        public SAPIENColorTable(Color containerColor, Color backColor, Color borderColor, Color selectBackColor)
+        {
+            ContainerBackColor = containerColor;
+            BackColor = backColor;
+            BorderColor = borderColor;
+			SelectBackColor = selectBackColor;
+        } 
+		public override Color MenuStripGradientBegin { get { return ContainerBackColor; } }
+        public override Color MenuStripGradientEnd { get { return ContainerBackColor; } }
+        public override Color ToolStripBorder { get { return BorderColor; } }
+        public override Color MenuItemBorder { get { return SelectBackColor; } }
+        public override Color MenuItemSelected { get { return SelectBackColor; } }
+        public override Color SeparatorDark { get { return BorderColor; } }
+        public override Color ToolStripDropDownBackground { get { return BackColor; } }
+        public override Color MenuBorder { get { return BorderColor; } }
+        public override Color MenuItemSelectedGradientBegin { get { return SelectBackColor; } }
+        public override Color MenuItemSelectedGradientEnd { get { return SelectBackColor; } }      
+        public override Color MenuItemPressedGradientBegin { get { return ContainerBackColor; } }
+        public override Color MenuItemPressedGradientEnd { get { return ContainerBackColor; } }
+        public override Color MenuItemPressedGradientMiddle { get { return ContainerBackColor; } }
+        public override Color ImageMarginGradientBegin { get { return BackColor; } }
+        public override Color ImageMarginGradientEnd { get { return BackColor; } }
+        public override Color ImageMarginGradientMiddle { get { return BackColor; } }
+    }
+}"
+		}
+		#endregion
+		
+		$colorTable = New-Object SAPIENTypes.SAPIENColorTable -ArgumentList $ContainerColor, $BackColor, $BorderColor, $MenuSelectionColor
+		$render = New-Object System.Windows.Forms.ToolStripProfessionalRenderer -ArgumentList $colorTable
+		[System.Windows.Forms.ToolStripManager]::Renderer = $render
+		
+		#Set up our processing queue
+		$Queue = New-Object System.Collections.Generic.Queue[System.ComponentModel.Component]
+		$Queue.Enqueue($Control)
+		
+		Add-Type -AssemblyName System.Core
+		
+		#Only process the controls once.
+		$Processed = New-Object System.Collections.Generic.HashSet[System.ComponentModel.Component]
+		
+		#Apply the colors to the controls
+		while ($Queue.Count -gt 0)
+		{
+			$target = $Queue.Dequeue()
+			
+			#Skip controls we already processed
+			if ($Processed.Contains($target)) { continue }
+			$Processed.Add($target)
+			
+			#Set the text color
+			$target.ForeColor = $ForeColor
+			
+			#region Handle Controls
+			if ($target -is [System.Windows.Forms.Form])
+			{
+				#Set Font
+				$target.Font = $Font
+				$target.BackColor = $ContainerColor
+			}
+			elseif ($target -is [System.Windows.Forms.SplitContainer])
+			{
+				$target.BackColor = $BorderColor
+			}
+			elseif ($target -is [System.Windows.Forms.PropertyGrid])
+			{
+				$target.BackColor = $BorderColor
+				$target.ViewBackColor = $BackColor
+				$target.ViewForeColor = $ForeColor
+				$target.ViewBorderColor = $BorderColor
+				$target.CategoryForeColor = $ForeColor
+				$target.CategorySplitterColor = $ContainerColor
+				$target.HelpBackColor = $BackColor
+				$target.HelpForeColor = $ForeColor
+				$target.HelpBorderColor = $BorderColor
+				$target.CommandsBackColor = $BackColor
+				$target.CommandsBorderColor = $BorderColor
+				$target.CommandsForeColor = $ForeColor
+				$target.LineColor = $ContainerColor
+			}
+			elseif ($target -is [System.Windows.Forms.ContainerControl] -or
+				$target -is [System.Windows.Forms.Panel])
+			{
+				#Set the BackColor for the container
+				$target.BackColor = $ContainerColor
+				
+			}
+			elseif ($target -is [System.Windows.Forms.GroupBox])
+			{
+				$target.FlatStyle = 'Flat'
+			}
+			elseif ($target -is [System.Windows.Forms.Button])
+			{
+				$target.FlatStyle = 'Flat'
+				$target.FlatAppearance.BorderColor = $BorderColor
+				$target.BackColor = $BackColor
+			}
+			elseif ($target -is [System.Windows.Forms.CheckBox] -or
+				$target -is [System.Windows.Forms.RadioButton] -or
+				$target -is [System.Windows.Forms.Label])
+			{
+				#$target.FlatStyle = 'Flat'
+			}
+			elseif ($target -is [System.Windows.Forms.ComboBox])
+			{
+				$target.BackColor = $BackColor
+				$target.FlatStyle = 'Flat'
+			}
+			elseif ($target -is [System.Windows.Forms.TextBox])
+			{
+				$target.BorderStyle = 'FixedSingle'
+				$target.BackColor = $BackColor
+			}
+			elseif ($target -is [System.Windows.Forms.DataGridView])
+			{
+				$target.GridColor = $BorderColor
+				$target.BackgroundColor = $ContainerColor
+				$target.DefaultCellStyle.BackColor = $WindowColor
+				$target.DefaultCellStyle.SelectionBackColor = $SelectionBackColor
+				$target.DefaultCellStyle.SelectionForeColor = $SelectionForeColor
+				$target.ColumnHeadersDefaultCellStyle.BackColor = $ContainerColor
+				$target.ColumnHeadersDefaultCellStyle.ForeColor = $ForeColor
+				$target.EnableHeadersVisualStyles = $false
+				$target.ColumnHeadersBorderStyle = 'Single'
+				$target.RowHeadersBorderStyle = 'Single'
+				$target.RowHeadersDefaultCellStyle.BackColor = $ContainerColor
+				$target.RowHeadersDefaultCellStyle.ForeColor = $ForeColor
+				
+			}
+			elseif ($PSVersionTable.PSVersion.Major -le 5 -and $target -is [System.Windows.Forms.DataGrid])
+			{
+				$target.CaptionBackColor = $WindowColor
+				$target.CaptionForeColor = $ForeColor
+				$target.BackgroundColor = $ContainerColor
+				$target.BackColor = $WindowColor
+				$target.ForeColor = $ForeColor
+				$target.HeaderBackColor = $ContainerColor
+				$target.HeaderForeColor = $ForeColor
+				$target.FlatMode = $true
+				$target.BorderStyle = 'FixedSingle'
+				$target.GridLineColor = $BorderColor
+				$target.AlternatingBackColor = $ContainerColor
+				$target.SelectionBackColor = $SelectionBackColor
+				$target.SelectionForeColor = $SelectionForeColor
+			}
+			elseif ($target -is [System.Windows.Forms.ToolStrip])
+			{
+				
+				$target.BackColor = $BackColor
+				$target.Renderer = $render
+				
+				foreach ($item in $target.Items)
+				{
+					$Queue.Enqueue($item)
+				}
+			}
+			elseif ($target -is [System.Windows.Forms.ToolStripMenuItem] -or
+				$target -is [System.Windows.Forms.ToolStripDropDown] -or
+				$target -is [System.Windows.Forms.ToolStripDropDownItem])
+			{
+				$target.BackColor = $BackColor
+				foreach ($item in $target.DropDownItems)
+				{
+					$Queue.Enqueue($item)
+				}
+			}
+			elseif ($target -is [System.Windows.Forms.ListBox] -or
+				$target -is [System.Windows.Forms.ListView] -or
+				$target -is [System.Windows.Forms.TreeView])
+			{
+				$target.BackColor = $WindowColor
+			}
+			else
+			{
+				$target.BackColor = $BackColor
+			}
+			#endregion
+			
+			if ($target -is [System.Windows.Forms.Control])
+			{
+				#Queue all the child controls
+				foreach ($child in $target.Controls)
+				{
+					$Queue.Enqueue($child)
+				}
+				if ($target.ContextMenuStrip)
+				{
+					$Queue.Enqueue($target.ContextMenuStrip);
+				}
+			}
+		}
+	}
+	#endregion
+	
+	#region Control Helper Functions
+	function Update-ComboBox
+	{
+	<#
+		.SYNOPSIS
+			This functions helps you load items into a ComboBox.
+		
+		.DESCRIPTION
+			Use this function to dynamically load items into the ComboBox control.
+		
+		.PARAMETER ComboBox
+			The ComboBox control you want to add items to.
+		
+		.PARAMETER Items
+			The object or objects you wish to load into the ComboBox's Items collection.
+		
+		.PARAMETER DisplayMember
+			Indicates the property to display for the items in this control.
+			
+		.PARAMETER ValueMember
+			Indicates the property to use for the value of the control.
+		
+		.PARAMETER Append
+			Adds the item(s) to the ComboBox without clearing the Items collection.
+		
+		.EXAMPLE
+			Update-ComboBox $combobox1 "Red", "White", "Blue"
+		
+		.EXAMPLE
+			Update-ComboBox $combobox1 "Red" -Append
+			Update-ComboBox $combobox1 "White" -Append
+			Update-ComboBox $combobox1 "Blue" -Append
+		
+		.EXAMPLE
+			Update-ComboBox $combobox1 (Get-Process) "ProcessName"
+		
+		.NOTES
+			Additional information about the function.
+	#>
+		
+		param
+		(
+			[Parameter(Mandatory = $true)]
+			[ValidateNotNull()]
+			[System.Windows.Forms.ComboBox]
+			$ComboBox,
+			[Parameter(Mandatory = $true)]
+			[ValidateNotNull()]
+			$Items,
+			[Parameter(Mandatory = $false)]
+			[string]$DisplayMember,
+			[Parameter(Mandatory = $false)]
+			[string]$ValueMember,
+			[switch]
+			$Append
+		)
+		
+		if (-not $Append)
+		{
+			$ComboBox.Items.Clear()
+		}
+		
+		if ($Items -is [Object[]])
+		{
+			$ComboBox.Items.AddRange($Items)
+		}
+		elseif ($Items -is [System.Collections.IEnumerable])
+		{
+			$ComboBox.BeginUpdate()
+			foreach ($obj in $Items)
+			{
+				$ComboBox.Items.Add($obj)
+			}
+			$ComboBox.EndUpdate()
+		}
+		else
+		{
+			$ComboBox.Items.Add($Items)
+		}
+		
+		if ($DisplayMember)
+		{
+			$ComboBox.DisplayMember = $DisplayMember
+		}
+		
+		if ($ValueMember)
+		{
+			$ComboBox.ValueMember = $ValueMember
+		}
+	}
+	
+	
+	#endregion
+	
+	$listlog_SelectedIndexChanged={
+		#TODO: Place custom script here
+		
+	}
+	
+	$buttonCancel_Click={
+		[System.Windows.Forms.Application]::Exit()
+		
+	}
+	
+	$buttonGo_Click={
+		#TODO: Place custom script here
+		if ($listlog.SelectedIndex -gt -1)
+		{
+			Try
+			{
+				Get-EventLog -LogName ($listlog.SelectedItem) -Newest 100 | Out-GridView
+			}
+			catch
+			{
+				#Add-Type -AssemblyName "System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"
+				[void][System.Windows.Forms.MessageBox]::Show('Cant do it', 'Your script') # Casting the method to [void] suppresses the output. 
+			}
+		}
+	}
+	
+	# --End User Generated Script--
+	#----------------------------------------------
+	#region Generated Events
+	#----------------------------------------------
+	
+	$Form_StateCorrection_Load=
+	{
+		#Correct the initial state of the form to prevent the .Net maximized form issue
+		$formEventView.WindowState = $InitialFormWindowState
+	}
+	
+	$Form_Cleanup_FormClosed=
+	{
+		#Remove all event handlers from the controls
+		try
+		{
+			$buttonGo.remove_Click($buttonGo_Click)
+			$buttonCancel.remove_Click($buttonCancel_Click)
+			$listlog.remove_SelectedIndexChanged($listlog_SelectedIndexChanged)
+			$formEventView.remove_Load($formEventView_Load)
+			$darkToolStripMenuItem.remove_Click($darkToolStripMenuItem_Click)
+			$lightToolStripMenuItem.remove_Click($lightToolStripMenuItem_Click)
+			$formEventView.remove_Load($Form_StateCorrection_Load)
+			$formEventView.remove_FormClosed($Form_Cleanup_FormClosed)
+		}
+		catch { Out-Null <# Prevent PSScriptAnalyzer warning #> }
+		$formEventView.Dispose()
+		$menustripTheme.Dispose()
+		$themeToolStripMenuItem.Dispose()
+		$darkToolStripMenuItem.Dispose()
+		$lightToolStripMenuItem.Dispose()
+		$listlog.Dispose()
+		$labelEvents.Dispose()
+		$buttonCancel.Dispose()
+		$buttonGo.Dispose()
+	}
+	#endregion Generated Events
+
+	#----------------------------------------------
+	#region Generated Form Code
+	#----------------------------------------------
+	$formEventView.SuspendLayout()
+	$menustripTheme.SuspendLayout()
+	#
+	# formEventView
+	#
+	$formEventView.Controls.Add($buttonGo)
+	$formEventView.Controls.Add($buttonCancel)
+	$formEventView.Controls.Add($labelEvents)
+	$formEventView.Controls.Add($listlog)
+	$formEventView.Controls.Add($menustripTheme)
+	$formEventView.AutoScaleDimensions = New-Object System.Drawing.SizeF(8, 17)
+	$formEventView.AutoScaleMode = 'Font'
+	$formEventView.ClientSize = New-Object System.Drawing.Size(579, 231)
+	$formEventView.Margin = '5, 5, 5, 5'
+	$formEventView.Name = 'formEventView'
+	$formEventView.StartPosition = 'CenterScreen'
+	$formEventView.Text = 'Event View'
+	$formEventView.add_Load($formEventView_Load)
+	#
+	# buttonGo
+	#
+	$buttonGo.Location = New-Object System.Drawing.Point(430, 162)
+	$buttonGo.Margin = '4, 4, 4, 4'
+	$buttonGo.Name = 'buttonGo'
+	$buttonGo.Size = New-Object System.Drawing.Size(100, 30)
+	$buttonGo.TabIndex = 18
+	$buttonGo.Text = 'Go'
+	$buttonGo.UseVisualStyleBackColor = $True
+	$buttonGo.add_Click($buttonGo_Click)
+	#
+	# buttonCancel
+	#
+	$buttonCancel.Location = New-Object System.Drawing.Point(322, 162)
+	$buttonCancel.Margin = '4, 4, 4, 4'
+	$buttonCancel.Name = 'buttonCancel'
+	$buttonCancel.Size = New-Object System.Drawing.Size(100, 30)
+	$buttonCancel.TabIndex = 17
+	$buttonCancel.Text = 'Cancel'
+	$buttonCancel.UseVisualStyleBackColor = $True
+	$buttonCancel.add_Click($buttonCancel_Click)
+	#
+	# labelEvents
+	#
+	$labelEvents.AutoSize = $True
+	$labelEvents.Location = New-Object System.Drawing.Point(13, 9)
+	$labelEvents.Margin = '4, 0, 4, 0'
+	$labelEvents.Name = 'labelEvents'
+	$labelEvents.Size = New-Object System.Drawing.Size(51, 17)
+	$labelEvents.TabIndex = 16
+	$labelEvents.Text = 'Events'
+	#
+	# listlog
+	#
+	$listlog.Dock = 'Fill'
+	$listlog.DropDownStyle = 'DropDownList'
+	$listlog.FormattingEnabled = $True
+	$listlog.Location = New-Object System.Drawing.Point(0, 30)
+	$listlog.Margin = '4, 4, 4, 4'
+	$listlog.Name = 'listlog'
+	$listlog.Size = New-Object System.Drawing.Size(579, 25)
+	$listlog.TabIndex = 15
+	$listlog.add_SelectedIndexChanged($listlog_SelectedIndexChanged)
+	#
+	# menustripTheme
+	#
+	$menustripTheme.ImageScalingSize = New-Object System.Drawing.Size(20, 20)
+	[void]$menustripTheme.Items.Add($themeToolStripMenuItem)
+	$menustripTheme.Location = New-Object System.Drawing.Point(0, 0)
+	$menustripTheme.Name = 'menustripTheme'
+	$menustripTheme.Padding = '7, 3, 0, 3'
+	$menustripTheme.ShowItemToolTips = $True
+	$menustripTheme.Size = New-Object System.Drawing.Size(579, 30)
+	$menustripTheme.TabIndex = 14
+	$menustripTheme.Text = 'menustrip1'
+	#
+	# themeToolStripMenuItem
+	#
+	$themeToolStripMenuItem.Alignment = 'Right'
+	[void]$themeToolStripMenuItem.DropDownItems.Add($darkToolStripMenuItem)
+	[void]$themeToolStripMenuItem.DropDownItems.Add($lightToolStripMenuItem)
+	#region Binary Data
+	$Formatter_binaryFomatter = New-Object System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+	$System_IO_MemoryStream = New-Object System.IO.MemoryStream (,[byte[]][System.Convert]::FromBase64String('
+AAEAAAD/////AQAAAAAAAAAMAgAAAFFTeXN0ZW0uRHJhd2luZywgVmVyc2lvbj00LjAuMC4wLCBD
+dWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWIwM2Y1ZjdmMTFkNTBhM2EFAQAAABVTeXN0
+ZW0uRHJhd2luZy5CaXRtYXABAAAABERhdGEHAgIAAAAJAwAAAA8DAAAALAEAAAKJUE5HDQoaCgAA
+AA1JSERSAAAAEAAAABAIBgAAAB/z/2EAAAAEZ0FNQQAAsY8L/GEFAAAACXBIWXMAAA68AAAOvAGV
+vHJJAAAAGHRFWHRTb2Z0d2FyZQBwYWludC5uZXQgNC4xLjVkR1hSAAAAqklEQVQ4T2P4//8/RRhC
+oAH7qm0T7So2/wDi/1D8zb5qaz9UGg4wDLCr3OqKpAkXtoMqRzUAqNkZi2IceIs1pgFYFeLGKAY4
+1OzqxaYIHwaGUwfcACDnOzZFBPA7ZAOwKSCIqWoAZV5wqN3dj0UBXmxfvR0RiBRHIwgATSQ+IVVu
+xUxIIECUIZVbbaHKMQ2AAYfaXROBAfsDFDtQ/B2U2KDScAA3gHz8nwEAonU00JrpvTMAAAAASUVO
+RK5CYIIL'))
+	#endregion
+	$themeToolStripMenuItem.Image = $Formatter_binaryFomatter.Deserialize($System_IO_MemoryStream)
+	$Formatter_binaryFomatter = $null
+	$System_IO_MemoryStream = $null
+	$themeToolStripMenuItem.Name = 'themeToolStripMenuItem'
+	$themeToolStripMenuItem.Size = New-Object System.Drawing.Size(32, 24)
+	$themeToolStripMenuItem.ToolTipText = 'Theme'
+	#
+	# darkToolStripMenuItem
+	#
+	$darkToolStripMenuItem.Name = 'darkToolStripMenuItem'
+	$darkToolStripMenuItem.Size = New-Object System.Drawing.Size(111, 24)
+	$darkToolStripMenuItem.Text = 'Dark'
+	$darkToolStripMenuItem.add_Click($darkToolStripMenuItem_Click)
+	#
+	# lightToolStripMenuItem
+	#
+	$lightToolStripMenuItem.Name = 'lightToolStripMenuItem'
+	$lightToolStripMenuItem.Size = New-Object System.Drawing.Size(111, 24)
+	$lightToolStripMenuItem.Text = 'Light'
+	$lightToolStripMenuItem.add_Click($lightToolStripMenuItem_Click)
+	$menustripTheme.ResumeLayout()
+	$formEventView.ResumeLayout()
+	#endregion Generated Form Code
+
+	#----------------------------------------------
+
+	#Save the initial state of the form
+	$InitialFormWindowState = $formEventView.WindowState
+	#Init the OnLoad event to correct the initial state of the form
+	$formEventView.add_Load($Form_StateCorrection_Load)
+	#Clean up the control events
+	$formEventView.add_FormClosed($Form_Cleanup_FormClosed)
+	#Show the Form
+	return $formEventView.ShowDialog()
+
+} #End Function
+
+#Call the form
+Show-test_psf | Out-Null
