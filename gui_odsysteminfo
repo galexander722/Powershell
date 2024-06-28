@@ -1,49 +1,44 @@
-#----------------------------------------------
-#region Application Functions
-#----------------------------------------------
-
-#endregion Application Functions
-
-#----------------------------------------------
-# Generated Form Function
-#----------------------------------------------
 function Show-Getme_psf {
 
-	#----------------------------------------------
-	#region Import the Assemblies
-	#----------------------------------------------
 	[void][reflection.assembly]::Load('System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089')
 	[void][reflection.assembly]::Load('System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
 	[void][reflection.assembly]::Load('System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a')
 	[void][reflection.assembly]::Load('System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089')
 	[void][reflection.assembly]::Load('PresentationFramework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35')
-	#endregion Import Assemblies
 
-	#----------------------------------------------
-	#region Generated Form Objects
-	#----------------------------------------------
 	[System.Windows.Forms.Application]::EnableVisualStyles()
 	$formViewODSystemInformat = New-Object 'System.Windows.Forms.Form'
+	$buttonPermissionCheck = New-Object 'System.Windows.Forms.Button'
+	$labelOR = New-Object 'System.Windows.Forms.Label'
+	$labelNothingIsWorking = New-Object 'System.Windows.Forms.Label'
+	$labelBoth = New-Object 'System.Windows.Forms.Label'
+	$labelExamRoom = New-Object 'System.Windows.Forms.Label'
+	$labelPretestRoom = New-Object 'System.Windows.Forms.Label'
+	$labelInformation = New-Object 'System.Windows.Forms.Label'
+	$buttonImportModule = New-Object 'System.Windows.Forms.Button'
+	$buttonBaudFix = New-Object 'System.Windows.Forms.Button'
+	$buttonLogoffUser = New-Object 'System.Windows.Forms.Button'
+	$buttonDHCPFix = New-Object 'System.Windows.Forms.Button'
+	$buttonPingODDevices = New-Object 'System.Windows.Forms.Button'
+	$buttonMakeInstallFolders = New-Object 'System.Windows.Forms.Button'
+	$buttonRevScanningFix = New-Object 'System.Windows.Forms.Button'
 	$buttonQueryDrives = New-Object 'System.Windows.Forms.Button'
 	$buttonQueryNIC = New-Object 'System.Windows.Forms.Button'
 	$buttonQuery = New-Object 'System.Windows.Forms.Button'
-	$buttonCancel = New-Object 'System.Windows.Forms.Button'
+	$buttonClose = New-Object 'System.Windows.Forms.Button'
 	$labelDNSNameOrIP = New-Object 'System.Windows.Forms.Label'
 	$textbox1 = New-Object 'System.Windows.Forms.TextBox'
+	$bindingsource1 = New-Object 'System.Windows.Forms.BindingSource'
 	$InitialFormWindowState = New-Object 'System.Windows.Forms.FormWindowState'
-	#endregion Generated Form Objects
 
-	#----------------------------------------------
-	# User Generated Script
-	#----------------------------------------------
 	
 	$formViewODSystemInformat_Load = {
-		#TODO: Initialize Form Controls here
+		
 		Set-ControlTheme $formViewODSystemInformat -Theme Dark
 	}
 	
 	$darkToolStripMenuItem_Click = {
-		#TODO: Place custom script here
+		
 		Set-ControlTheme -Control $formViewODSystemInformat -Theme Dark
 	}
 	
@@ -51,38 +46,6 @@ function Show-Getme_psf {
 		Set-ControlTheme -Control $formViewODSystemInformat -Theme Light
 	}
 	
-	#region Control Theme Helper Function
-	<#
-		.SYNOPSIS
-			Applies a theme to the control and its children.
-		
-		.PARAMETER Control
-			The control to theme. Usually the form itself.
-		
-		.PARAMETER Theme
-			The color theme:
-			Light
-			Dark
-	
-		.PARAMETER CustomColor
-			A hashtable that contains the color values.
-			Keys:
-			WindowColor
-			ContainerColor
-			BackColor
-			ForeColor
-			BorderColor
-			SelectionForeColor
-			SelectionBackColor
-			MenuSelectionColor
-		.EXAMPLE
-			PS C:\> Set-ControlTheme -Control $form1 -Theme Dark
-		
-		.EXAMPLE
-			PS C:\> Set-ControlTheme -Control $form1 -CustomColor @{ WindowColor = 'White'; ContainerBackColor = 'Gray'; BackColor... }
-		.NOTES
-			Created by SAPIEN Technologies, Inc.
-	#>
 	function Set-ControlTheme
 	{
 		[CmdletBinding()]
@@ -98,7 +61,7 @@ function Show-Getme_psf {
 		
 		$Font = [System.Drawing.Font]::New('Segoe UI', 9)
 		
-		#Initialize the colors
+		
 		if ($Theme -eq 'Dark')
 		{
 			$WindowColor = [System.Drawing.Color]::FromArgb(32, 32, 32)
@@ -124,7 +87,7 @@ function Show-Getme_psf {
 		
 		if ($CustomColor)
 		{
-			#Check and Validate the custom colors:
+			
 			$Color = $CustomColor.WindowColor -as [System.Drawing.Color]
 			if ($Color) { $WindowColor = $Color }
 			$Color = $CustomColor.ContainerColor -as [System.Drawing.Color]
@@ -143,11 +106,10 @@ function Show-Getme_psf {
 			if ($Color) { $MenuSelectionColor = $Color }
 		}
 		
-		#Define the custom renderer for the menus
-		#region Add-Type definition
+		
 		try
 		{
-			[SAPIENTypes.SAPIENColorTable] | Out-Null
+			[ODImagingTypes.ODImagingColorTable] | Out-Null
 		}
 		catch
 		{
@@ -163,16 +125,16 @@ function Show-Getme_psf {
 using System;
 using System.Windows.Forms;
 using System.Drawing;
-namespace SAPIENTypes
+namespace ODImagingTypes
 {
-    public class SAPIENColorTable : ProfessionalColorTable
+    public class ODImagingColorTable : ProfessionalColorTable
     {
         Color ContainerBackColor;
         Color BackColor;
         Color BorderColor;
 		Color SelectBackColor;
 
-        public SAPIENColorTable(Color containerColor, Color backColor, Color borderColor, Color selectBackColor)
+        public ODImagingColorTable(Color containerColor, Color backColor, Color borderColor, Color selectBackColor)
         {
             ContainerBackColor = containerColor;
             BackColor = backColor;
@@ -198,37 +160,37 @@ namespace SAPIENTypes
     }
 }"
 		}
-		#endregion
 		
-		$colorTable = New-Object SAPIENTypes.SAPIENColorTable -ArgumentList $ContainerColor, $BackColor, $BorderColor, $MenuSelectionColor
+		
+		$colorTable = New-Object ODImagingTypes.ODImagingColorTable -ArgumentList $ContainerColor, $BackColor, $BorderColor, $MenuSelectionColor
 		$render = New-Object System.Windows.Forms.ToolStripProfessionalRenderer -ArgumentList $colorTable
 		[System.Windows.Forms.ToolStripManager]::Renderer = $render
 		
-		#Set up our processing queue
+		
 		$Queue = New-Object System.Collections.Generic.Queue[System.ComponentModel.Component]
 		$Queue.Enqueue($Control)
 		
 		Add-Type -AssemblyName System.Core
 		
-		#Only process the controls once.
+		
 		$Processed = New-Object System.Collections.Generic.HashSet[System.ComponentModel.Component]
 		
-		#Apply the colors to the controls
+		
 		while ($Queue.Count -gt 0)
 		{
 			$target = $Queue.Dequeue()
 			
-			#Skip controls we already processed
+			
 			if ($Processed.Contains($target)) { continue }
 			$Processed.Add($target)
 			
-			#Set the text color
+			
 			$target.ForeColor = $ForeColor
 			
-			#region Handle Controls
+			
 			if ($target -is [System.Windows.Forms.Form])
 			{
-				#Set Font
+				
 				$target.Font = $Font
 				$target.BackColor = $ContainerColor
 			}
@@ -255,7 +217,7 @@ namespace SAPIENTypes
 			elseif ($target -is [System.Windows.Forms.ContainerControl] -or
 				$target -is [System.Windows.Forms.Panel])
 			{
-				#Set the BackColor for the container
+				
 				$target.BackColor = $ContainerColor
 				
 			}
@@ -273,7 +235,7 @@ namespace SAPIENTypes
 				$target -is [System.Windows.Forms.RadioButton] -or
 				$target -is [System.Windows.Forms.Label])
 			{
-				#$target.FlatStyle = 'Flat'
+				
 			}
 			elseif ($target -is [System.Windows.Forms.ComboBox])
 			{
@@ -348,11 +310,10 @@ namespace SAPIENTypes
 			{
 				$target.BackColor = $BackColor
 			}
-			#endregion
 			
 			if ($target -is [System.Windows.Forms.Control])
 			{
-				#Queue all the child controls
+				
 				foreach ($child in $target.Controls)
 				{
 					$Queue.Enqueue($child)
@@ -364,14 +325,14 @@ namespace SAPIENTypes
 			}
 		}
 	}
-	#endregion
 	
-	$buttonCancel_Click = {
+	
+	$buttonClose_Click = {
 		[System.Windows.Forms.Application]::Exit()
 	}
 	
 	$buttonQuery_Click = {
-		#TODO: 
+		 
 		if ($textbox1.text -ne $null)
 		{
 			get-odsysteminfo -computername ($textbox1.text) -showprogress | Select-Object -Property	*| Out-GridView
@@ -380,7 +341,7 @@ namespace SAPIENTypes
 	
 	
 	$buttonQueryNIC_Click={
-		#TODO: Place custom script here
+		
 		if ($textbox1.text -ne $null)
 		{
 			get-odsysteminfo -computername ($textbox1.text) -showprogress | Select-Object -ExpandProperty networkadapters | Out-GridView
@@ -389,33 +350,269 @@ namespace SAPIENTypes
 	}
 	
 	$buttonQueryDrives_Click={
-		#TODO: Place custom script here
+		
 		if ($textbox1.text -ne $null)
 		{
 			get-odsysteminfo -computername ($textbox1.text) -showprogress | Select-Object -ExpandProperty localdrives | Out-GridView
 		}
 	}
 	
-	# --End User Generated Script--
-	#----------------------------------------------
-	#region Generated Events
-	#----------------------------------------------
+	
+	function Update-ListViewColumnSort
+	{
+	
+		
+		param
+		(
+			[Parameter(Mandatory = $true)]
+			[ValidateNotNull()]
+			[System.Windows.Forms.ListView]
+			$ListView,
+			[Parameter(Mandatory = $true)]
+			[int]
+			$ColumnIndex,
+			[System.Windows.Forms.SortOrder]
+			$SortOrder = 'None'
+		)
+		
+		if (($ListView.Items.Count -eq 0) -or ($ColumnIndex -lt 0) -or ($ColumnIndex -ge $ListView.Columns.Count))
+		{
+			return;
+		}
+		
+		
+		try
+		{
+			[ListViewIteSmComparer] | Out-Null
+		}
+		catch
+		{
+			Add-Type -ReferencedAssemblies ('System.Windows.Forms') -TypeDefinition  @" 
+	using System;
+	using System.Windows.Forms;
+	using System.Collections;
+	public class ListViewItemComparer : IComparer
+	{
+	    public int column;
+	    public SortOrder sortOrder;
+	    public ListViewItemComparer()
+	    {
+	        column = 0;
+			sortOrder = SortOrder.Ascending;
+	    }
+	    public ListViewItemComparer(int column, SortOrder sort)
+	    {
+	        this.column = column;
+			sortOrder = sort;
+	    }
+	    public int Compare(object x, object y)
+	    {
+			if(column >= ((ListViewItem)x).SubItems.Count)
+				return  sortOrder == SortOrder.Ascending ? -1 : 1;
+		
+			if(column >= ((ListViewItem)y).SubItems.Count)
+				return sortOrder == SortOrder.Ascending ? 1 : -1;
+		
+			if(sortOrder == SortOrder.Ascending)
+	        	return String.Compare(((ListViewItem)x).SubItems[column].Text, ((ListViewItem)y).SubItems[column].Text);
+			else
+				return String.Compare(((ListViewItem)y).SubItems[column].Text, ((ListViewItem)x).SubItems[column].Text);
+	    }
+	}
+"@ | Out-Null
+		}
+		
+		
+		if ($ListView.Tag -is [ListViewItemComparer])
+		{
+			
+			if ($SortOrder -eq [System.Windows.Forms.SortOrder]::None)
+			{
+				if ($ListView.Tag.column -eq $ColumnIndex -and $ListView.Tag.sortOrder -eq 'Ascending')
+				{
+					$ListView.Tag.sortOrder = 'Descending'
+				}
+				else
+				{
+					$ListView.Tag.sortOrder = 'Ascending'
+				}
+			}
+			else
+			{
+				$ListView.Tag.sortOrder = $SortOrder
+			}
+			
+			$ListView.Tag.column = $ColumnIndex
+			$ListView.Sort() 
+		}
+		else
+		{
+			if ($SortOrder -eq [System.Windows.Forms.SortOrder]::None)
+			{
+				$SortOrder = [System.Windows.Forms.SortOrder]::Ascending
+			}
+			
+			
+			$ListView.Tag = New-Object ListViewItemComparer ($ColumnIndex, $SortOrder)
+			$ListView.ListViewItemSorter = $ListView.Tag 
+		}
+	}
+	
+	
+	
+	function Add-ListViewItem
+	{
+	
+		
+		Param( 
+		[ValidateNotNull()]
+		[Parameter(Mandatory=$true)]
+		[System.Windows.Forms.ListView]$ListView,
+		[ValidateNotNull()]
+		[Parameter(Mandatory=$true)]
+		$Items,
+		[int]$ImageIndex = -1,
+		[string[]]$SubItems,
+		$Group,
+		[switch]$Clear)
+		
+		if($Clear)
+		{
+			$ListView.Items.Clear();
+	    }
+	    
+	    $lvGroup = $null
+	    if ($Group -is [System.Windows.Forms.ListViewGroup])
+	    {
+	        $lvGroup = $Group
+	    }
+	    elseif ($Group -is [string])
+	    {
+	       
+	        foreach ($groupItem in $ListView.Groups)
+	        {
+	            if ($groupItem.Name -eq $Group)
+	            {
+	                $lvGroup = $groupItem
+	                break
+	            }
+	        }
+	        
+	        if ($null -eq $lvGroup)
+	        {
+	            $lvGroup = $ListView.Groups.Add($Group, $Group)
+	        }
+	    }
+	    
+		if($Items -is [Array])
+		{
+			$ListView.BeginUpdate()
+			foreach ($item in $Items)
+			{		
+				$listitem  = $ListView.Items.Add($item.ToString(), $ImageIndex)
+				
+				$listitem.Tag = $item
+				
+				if($null -ne $SubItems)
+				{
+					$listitem.SubItems.AddRange($SubItems)
+				}
+				
+				if($null -ne $lvGroup)
+				{
+					$listitem.Group = $lvGroup
+				}
+			}
+			$ListView.EndUpdate()
+		}
+		else
+		{
+			
+			$listitem  = $ListView.Items.Add($Items.ToString(), $ImageIndex)
+			$listitem.Tag = $Items
+			
+			if($null -ne $SubItems)
+			{
+				$listitem.SubItems.AddRange($SubItems)
+			}
+			
+			if($null -ne $lvGroup)
+			{
+				$listitem.Group = $lvGroup
+			}
+		}
+	}
+	
+	
+	
+	$buttonDHCPFix_Click={
+		
+	}
+	
+	$labelPretestRoom_Click={
+		
+		
+	}
+	
+	$buttonLogoffUser_Click={
+		
+		
+	}
+	
+	$buttonRevScanningFix_Click={
+		
+		
+	}
+	
+	$buttonBaudFix_Click={
+		
+		
+	}
+	
+	$buttonMakeInstallFolders_Click={
+		
+		
+	}
+	
+	$buttonPingODDevices_Click={
+		
+		
+	}
+	
+	$buttonImportModule_Click={
+		
+		
+	}
+	
+	$buttonPermissionCheck_Click={
+	
+		
+	}
+
 	
 	$Form_StateCorrection_Load=
 	{
-		#Correct the initial state of the form to prevent the .Net maximized form issue
 		$formViewODSystemInformat.WindowState = $InitialFormWindowState
 	}
 	
 	$Form_Cleanup_FormClosed=
 	{
-		#Remove all event handlers from the controls
+		
 		try
 		{
+			$buttonPermissionCheck.remove_Click($buttonPermissionCheck_Click)
+			$labelPretestRoom.remove_Click($labelPretestRoom_Click)
+			$buttonImportModule.remove_Click($buttonImportModule_Click)
+			$buttonBaudFix.remove_Click($buttonBaudFix_Click)
+			$buttonLogoffUser.remove_Click($buttonLogoffUser_Click)
+			$buttonDHCPFix.remove_Click($buttonDHCPFix_Click)
+			$buttonPingODDevices.remove_Click($buttonPingODDevices_Click)
+			$buttonMakeInstallFolders.remove_Click($buttonMakeInstallFolders_Click)
+			$buttonRevScanningFix.remove_Click($buttonRevScanningFix_Click)
 			$buttonQueryDrives.remove_Click($buttonQueryDrives_Click)
 			$buttonQueryNIC.remove_Click($buttonQueryNIC_Click)
 			$buttonQuery.remove_Click($buttonQuery_Click)
-			$buttonCancel.remove_Click($buttonCancel_Click)
+			$buttonClose.remove_Click($buttonClose_Click)
 			$formViewODSystemInformat.remove_Load($formViewODSystemInformat_Load)
 			$formViewODSystemInformat.remove_Load($Form_StateCorrection_Load)
 			$formViewODSystemInformat.remove_FormClosed($Form_Cleanup_FormClosed)
@@ -424,114 +621,246 @@ namespace SAPIENTypes
 		$formViewODSystemInformat.Dispose()
 		$textbox1.Dispose()
 		$labelDNSNameOrIP.Dispose()
-		$buttonCancel.Dispose()
+		$buttonClose.Dispose()
 		$buttonQuery.Dispose()
 		$buttonQueryNIC.Dispose()
 		$buttonQueryDrives.Dispose()
+		$buttonRevScanningFix.Dispose()
+		$buttonMakeInstallFolders.Dispose()
+		$buttonPingODDevices.Dispose()
+		$buttonDHCPFix.Dispose()
+		$bindingsource1.Dispose()
+		$buttonLogoffUser.Dispose()
+		$buttonBaudFix.Dispose()
+		$buttonImportModule.Dispose()
+		$labelInformation.Dispose()
+		$labelPretestRoom.Dispose()
+		$labelExamRoom.Dispose()
+		$labelBoth.Dispose()
+		$labelNothingIsWorking.Dispose()
+		$labelOR.Dispose()
+		$buttonPermissionCheck.Dispose()
 	}
-	#endregion Generated Events
 
-	#----------------------------------------------
-	#region Generated Form Code
-	#----------------------------------------------
 	$formViewODSystemInformat.SuspendLayout()
-	#
-	# formViewODSystemInformat
-	#
+	$bindingsource1.BeginInit()
+
+	$formViewODSystemInformat.Controls.Add($buttonPermissionCheck)
+	$formViewODSystemInformat.Controls.Add($labelOR)
+	$formViewODSystemInformat.Controls.Add($labelNothingIsWorking)
+	$formViewODSystemInformat.Controls.Add($labelBoth)
+	$formViewODSystemInformat.Controls.Add($labelExamRoom)
+	$formViewODSystemInformat.Controls.Add($labelPretestRoom)
+	$formViewODSystemInformat.Controls.Add($labelInformation)
+	$formViewODSystemInformat.Controls.Add($buttonImportModule)
+	$formViewODSystemInformat.Controls.Add($buttonBaudFix)
+	$formViewODSystemInformat.Controls.Add($buttonLogoffUser)
+	$formViewODSystemInformat.Controls.Add($buttonDHCPFix)
+	$formViewODSystemInformat.Controls.Add($buttonPingODDevices)
+	$formViewODSystemInformat.Controls.Add($buttonMakeInstallFolders)
+	$formViewODSystemInformat.Controls.Add($buttonRevScanningFix)
 	$formViewODSystemInformat.Controls.Add($buttonQueryDrives)
 	$formViewODSystemInformat.Controls.Add($buttonQueryNIC)
 	$formViewODSystemInformat.Controls.Add($buttonQuery)
-	$formViewODSystemInformat.Controls.Add($buttonCancel)
+	$formViewODSystemInformat.Controls.Add($buttonClose)
 	$formViewODSystemInformat.Controls.Add($labelDNSNameOrIP)
 	$formViewODSystemInformat.Controls.Add($textbox1)
 	$formViewODSystemInformat.AutoScaleDimensions = New-Object System.Drawing.SizeF(8, 17)
 	$formViewODSystemInformat.AutoScaleMode = 'Font'
 	$formViewODSystemInformat.BackColor = [System.Drawing.SystemColors]::ButtonShadow 
-	$formViewODSystemInformat.ClientSize = New-Object System.Drawing.Size(483, 144)
+	$formViewODSystemInformat.ClientSize = New-Object System.Drawing.Size(838, 350)
 	$formViewODSystemInformat.ControlBox = $False
 	$formViewODSystemInformat.Margin = '5, 5, 5, 5'
 	$formViewODSystemInformat.Name = 'formViewODSystemInformat'
 	$formViewODSystemInformat.StartPosition = 'CenterScreen'
 	$formViewODSystemInformat.Text = ' OD SystemInfo'
 	$formViewODSystemInformat.add_Load($formViewODSystemInformat_Load)
-	#
-	# buttonQueryDrives
-	#
-	$buttonQueryDrives.Location = New-Object System.Drawing.Point(133, 84)
+
+	$buttonPermissionCheck.Location = New-Object System.Drawing.Point(326, 9)
+	$buttonPermissionCheck.Margin = '4, 4, 4, 4'
+	$buttonPermissionCheck.Name = 'buttonPermissionCheck'
+	$buttonPermissionCheck.Size = New-Object System.Drawing.Size(191, 30)
+	$buttonPermissionCheck.TabIndex = 35
+	$buttonPermissionCheck.Text = 'Permission Check'
+	$buttonPermissionCheck.UseVisualStyleBackColor = $True
+	$buttonPermissionCheck.add_Click($buttonPermissionCheck_Click)
+
+	$labelOR.AutoSize = $True
+	$labelOR.Location = New-Object System.Drawing.Point(550, 16)
+	$labelOR.Margin = '4, 0, 4, 0'
+	$labelOR.Name = 'labelOR'
+	$labelOR.Size = New-Object System.Drawing.Size(29, 17)
+	$labelOR.TabIndex = 34
+	$labelOR.Text = 'OR'
+
+	$labelNothingIsWorking.AutoSize = $True
+	$labelNothingIsWorking.Location = New-Object System.Drawing.Point(138, 16)
+	$labelNothingIsWorking.Margin = '4, 0, 4, 0'
+	$labelNothingIsWorking.Name = 'labelNothingIsWorking'
+	$labelNothingIsWorking.Size = New-Object System.Drawing.Size(135, 17)
+	$labelNothingIsWorking.TabIndex = 33
+	$labelNothingIsWorking.Text = 'Nothing is working?:'
+
+	$labelBoth.AutoSize = $True
+	$labelBoth.Location = New-Object System.Drawing.Point(611, 142)
+	$labelBoth.Margin = '4, 0, 4, 0'
+	$labelBoth.Name = 'labelBoth'
+	$labelBoth.Size = New-Object System.Drawing.Size(37, 17)
+	$labelBoth.TabIndex = 32
+	$labelBoth.Text = 'Both'
+
+	$labelExamRoom.AutoSize = $True
+	$labelExamRoom.Location = New-Object System.Drawing.Point(404, 142)
+	$labelExamRoom.Margin = '4, 0, 4, 0'
+	$labelExamRoom.Name = 'labelExamRoom'
+	$labelExamRoom.Size = New-Object System.Drawing.Size(83, 17)
+	$labelExamRoom.TabIndex = 31
+	$labelExamRoom.Text = 'Exam Room'
+
+	$labelPretestRoom.AutoSize = $True
+	$labelPretestRoom.Location = New-Object System.Drawing.Point(210, 142)
+	$labelPretestRoom.Margin = '4, 0, 4, 0'
+	$labelPretestRoom.Name = 'labelPretestRoom'
+	$labelPretestRoom.Size = New-Object System.Drawing.Size(94, 17)
+	$labelPretestRoom.TabIndex = 30
+	$labelPretestRoom.Text = 'Pretest Room'
+	$labelPretestRoom.add_Click($labelPretestRoom_Click)
+
+	$labelInformation.AutoSize = $True
+	$labelInformation.Location = New-Object System.Drawing.Point(25, 142)
+	$labelInformation.Margin = '4, 0, 4, 0'
+	$labelInformation.Name = 'labelInformation'
+	$labelInformation.Size = New-Object System.Drawing.Size(78, 17)
+	$labelInformation.TabIndex = 29
+	$labelInformation.Text = 'Information'
+
+	$buttonImportModule.ForeColor = [System.Drawing.SystemColors]::Highlight 
+	$buttonImportModule.Location = New-Object System.Drawing.Point(611, 9)
+	$buttonImportModule.Margin = '4, 4, 4, 4'
+	$buttonImportModule.Name = 'buttonImportModule'
+	$buttonImportModule.Size = New-Object System.Drawing.Size(213, 30)
+	$buttonImportModule.TabIndex = 27
+	$buttonImportModule.Text = 'Import Module'
+	$buttonImportModule.UseVisualStyleBackColor = $True
+	$buttonImportModule.add_Click($buttonImportModule_Click)
+
+	$buttonBaudFix.Location = New-Object System.Drawing.Point(382, 211)
+	$buttonBaudFix.Margin = '4, 4, 4, 4'
+	$buttonBaudFix.Name = 'buttonBaudFix'
+	$buttonBaudFix.Size = New-Object System.Drawing.Size(135, 30)
+	$buttonBaudFix.TabIndex = 26
+	$buttonBaudFix.Text = 'Baud Fix'
+	$buttonBaudFix.UseVisualStyleBackColor = $True
+	$buttonBaudFix.add_Click($buttonBaudFix_Click)
+
+	$buttonLogoffUser.Location = New-Object System.Drawing.Point(563, 211)
+	$buttonLogoffUser.Margin = '4, 4, 4, 4'
+	$buttonLogoffUser.Name = 'buttonLogoffUser'
+	$buttonLogoffUser.Size = New-Object System.Drawing.Size(153, 30)
+	$buttonLogoffUser.TabIndex = 25
+	$buttonLogoffUser.Text = 'Logoff User'
+	$buttonLogoffUser.UseVisualStyleBackColor = $True
+	$buttonLogoffUser.add_Click($buttonLogoffUser_Click)
+
+	$buttonDHCPFix.Location = New-Object System.Drawing.Point(382, 173)
+	$buttonDHCPFix.Margin = '4, 4, 4, 4'
+	$buttonDHCPFix.Name = 'buttonDHCPFix'
+	$buttonDHCPFix.Size = New-Object System.Drawing.Size(135, 30)
+	$buttonDHCPFix.TabIndex = 24
+	$buttonDHCPFix.Text = 'DHCP Fix'
+	$buttonDHCPFix.UseVisualStyleBackColor = $True
+	$buttonDHCPFix.add_Click($buttonDHCPFix_Click)
+
+	$buttonPingODDevices.Location = New-Object System.Drawing.Point(166, 173)
+	$buttonPingODDevices.Margin = '4, 4, 4, 4'
+	$buttonPingODDevices.Name = 'buttonPingODDevices'
+	$buttonPingODDevices.Size = New-Object System.Drawing.Size(186, 30)
+	$buttonPingODDevices.TabIndex = 23
+	$buttonPingODDevices.Text = 'Ping OD Devices'
+	$buttonPingODDevices.UseVisualStyleBackColor = $True
+	$buttonPingODDevices.add_Click($buttonPingODDevices_Click)
+
+	$buttonMakeInstallFolders.Location = New-Object System.Drawing.Point(166, 211)
+	$buttonMakeInstallFolders.Margin = '4, 4, 4, 4'
+	$buttonMakeInstallFolders.Name = 'buttonMakeInstallFolders'
+	$buttonMakeInstallFolders.Size = New-Object System.Drawing.Size(186, 30)
+	$buttonMakeInstallFolders.TabIndex = 22
+	$buttonMakeInstallFolders.Text = 'Make Install Folders'
+	$buttonMakeInstallFolders.UseVisualStyleBackColor = $True
+	$buttonMakeInstallFolders.add_Click($buttonMakeInstallFolders_Click)
+
+	$buttonRevScanningFix.Location = New-Object System.Drawing.Point(563, 173)
+	$buttonRevScanningFix.Margin = '4, 4, 4, 4'
+	$buttonRevScanningFix.Name = 'buttonRevScanningFix'
+	$buttonRevScanningFix.Size = New-Object System.Drawing.Size(153, 30)
+	$buttonRevScanningFix.TabIndex = 21
+	$buttonRevScanningFix.Text = 'Rev Scanning Fix'
+	$buttonRevScanningFix.UseVisualStyleBackColor = $True
+	$buttonRevScanningFix.add_Click($buttonRevScanningFix_Click)
+	
+	$buttonQueryDrives.Location = New-Object System.Drawing.Point(12, 249)
 	$buttonQueryDrives.Margin = '4, 4, 4, 4'
 	$buttonQueryDrives.Name = 'buttonQueryDrives'
-	$buttonQueryDrives.Size = New-Object System.Drawing.Size(100, 30)
+	$buttonQueryDrives.Size = New-Object System.Drawing.Size(113, 30)
 	$buttonQueryDrives.TabIndex = 20
 	$buttonQueryDrives.Text = 'Query Drives'
 	$buttonQueryDrives.UseVisualStyleBackColor = $True
 	$buttonQueryDrives.add_Click($buttonQueryDrives_Click)
-	#
-	# buttonQueryNIC
-	#
-	$buttonQueryNIC.Location = New-Object System.Drawing.Point(254, 84)
+
+	$buttonQueryNIC.Location = New-Object System.Drawing.Point(12, 211)
 	$buttonQueryNIC.Margin = '4, 4, 4, 4'
 	$buttonQueryNIC.Name = 'buttonQueryNIC'
-	$buttonQueryNIC.Size = New-Object System.Drawing.Size(100, 30)
+	$buttonQueryNIC.Size = New-Object System.Drawing.Size(113, 30)
 	$buttonQueryNIC.TabIndex = 19
 	$buttonQueryNIC.Text = 'Query NIC'
 	$buttonQueryNIC.UseVisualStyleBackColor = $True
 	$buttonQueryNIC.add_Click($buttonQueryNIC_Click)
-	#
-	# buttonQuery
-	#
-	$buttonQuery.Location = New-Object System.Drawing.Point(371, 84)
+
+	$buttonQuery.Location = New-Object System.Drawing.Point(12, 173)
 	$buttonQuery.Margin = '4, 4, 4, 4'
 	$buttonQuery.Name = 'buttonQuery'
-	$buttonQuery.Size = New-Object System.Drawing.Size(100, 30)
+	$buttonQuery.Size = New-Object System.Drawing.Size(113, 30)
 	$buttonQuery.TabIndex = 18
 	$buttonQuery.Text = 'Query'
 	$buttonQuery.UseVisualStyleBackColor = $True
 	$buttonQuery.add_Click($buttonQuery_Click)
-	#
-	# buttonCancel
-	#
-	$buttonCancel.Location = New-Object System.Drawing.Point(13, 84)
-	$buttonCancel.Margin = '4, 4, 4, 4'
-	$buttonCancel.Name = 'buttonCancel'
-	$buttonCancel.Size = New-Object System.Drawing.Size(100, 30)
-	$buttonCancel.TabIndex = 17
-	$buttonCancel.Text = 'Cancel'
-	$buttonCancel.UseVisualStyleBackColor = $True
-	$buttonCancel.add_Click($buttonCancel_Click)
-	#
-	# labelDNSNameOrIP
-	#
+
+	$buttonClose.ForeColor = [System.Drawing.Color]::Red 
+	$buttonClose.Location = New-Object System.Drawing.Point(712, 301)
+	$buttonClose.Margin = '4, 4, 4, 4'
+	$buttonClose.Name = 'buttonClose'
+	$buttonClose.Size = New-Object System.Drawing.Size(112, 30)
+	$buttonClose.TabIndex = 17
+	$buttonClose.Text = 'Close'
+	$buttonClose.UseVisualStyleBackColor = $True
+	$buttonClose.add_Click($buttonClose_Click)
+
 	$labelDNSNameOrIP.AutoSize = $True
-	$labelDNSNameOrIP.Location = New-Object System.Drawing.Point(13, 19)
+	$labelDNSNameOrIP.Location = New-Object System.Drawing.Point(12, 100)
 	$labelDNSNameOrIP.Margin = '4, 0, 4, 0'
 	$labelDNSNameOrIP.Name = 'labelDNSNameOrIP'
 	$labelDNSNameOrIP.Size = New-Object System.Drawing.Size(113, 17)
 	$labelDNSNameOrIP.TabIndex = 16
 	$labelDNSNameOrIP.Text = 'DNS name or IP:'
-	#
-	# textbox1
-	#
-	$textbox1.Location = New-Object System.Drawing.Point(13, 53)
+
+	$textbox1.Location = New-Object System.Drawing.Point(173, 100)
 	$textbox1.Margin = '4, 4, 4, 4'
 	$textbox1.MaxLength = 35
 	$textbox1.Name = 'textbox1'
-	$textbox1.Size = New-Object System.Drawing.Size(458, 23)
+	$textbox1.Size = New-Object System.Drawing.Size(475, 23)
 	$textbox1.TabIndex = 15
+
+	$bindingsource1.EndInit()
 	$formViewODSystemInformat.ResumeLayout()
-	#endregion Generated Form Code
 
-	#----------------------------------------------
-
-	#Save the initial state of the form
 	$InitialFormWindowState = $formViewODSystemInformat.WindowState
-	#Init the OnLoad event to correct the initial state of the form
+
 	$formViewODSystemInformat.add_Load($Form_StateCorrection_Load)
-	#Clean up the control events
 	$formViewODSystemInformat.add_FormClosed($Form_Cleanup_FormClosed)
-	#Show the Form
+	
 	return $formViewODSystemInformat.ShowDialog()
 
-} #End Function
+} 
 
-#Call the form
+
 Show-Getme_psf | Out-Null
